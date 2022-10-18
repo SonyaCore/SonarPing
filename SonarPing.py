@@ -6,18 +6,21 @@
 # 	Github    : https://github.com/SonyaCore
 #   Licence   : https://www.gnu.org/licenses/gpl-3.0.en.html
 
-import os, sys
+import sys
 import time
 import socket
 import struct
 import select
 import random
 import json
+import signal
+import argparse
 from urllib.request import urlopen, Request
 from urllib.error import HTTPError
-import argparse
+
 
 NAME = "SonarPING"
+VER = 0.3
 
 formatter = lambda prog: argparse.HelpFormatter(prog, max_help_position=64)
 parser = argparse.ArgumentParser(prog=f"{NAME}", formatter_class=formatter)
@@ -37,7 +40,7 @@ option = parser.add_argument_group("ICMP Options")
 option.add_argument(
     "--delay",
     "-d",
-    type=int,
+    type=float,
     metavar="",
     help="ICMP requests delay for sending each packet",
 )
@@ -54,7 +57,7 @@ option.add_argument(
 option.add_argument(
     "--bytes",
     "-b",
-    type=int,
+    type=float,
     metavar="",
     help="Total Bytes to be Send with ICMP header",
 )
@@ -81,15 +84,23 @@ def banner(t=0.0005):
                                                                    /\____/
                                                                    \_/__/ 
 
-{}Starting Engine...{}
+{}Starting Engine {} {}...
                                                         """.format(
-        blue, green, reset
+        blue, green, VER, reset
     )
     for char in data:
         sys.stdout.write(char)
         time.sleep(t)
     sys.stdout.write("\n")
 
+
+def sigint_handler(signal, frame):
+    "Signal interrupt handler"
+    print("Process Interrupted")
+    sys.exit(0)
+
+
+signal.signal(signal.SIGINT, sigint_handler)
 
 # From /usr/include/linux/icmp.h.
 ICMP_ECHO_REQUEST = 8
@@ -133,8 +144,6 @@ def create_packet(id, byte: int):
     data = bytes(byte)
     # Calculate the checksum on the data and the dummy header.
     my_checksum = checksum(header + data)
-    # Now that we have the right checksum, we put that in. It's just easier
-    # to make up a new header than to stuff it into the dummy.
     header = struct.pack(
         "bbHHh", ICMP_ECHO_REQUEST, 0, socket.htons(my_checksum), id, 1
     )
@@ -212,7 +221,11 @@ def verbose_ping(dest_addr, wait: float, timeout, count: int):
             print("failed. (Timeout within {} seconds.)".format(timeout))
         else:
             delay = round(delay * 1000.0, 4)
-            print("{} Bytes from {}{}{} time={} ms.".format(args.bytes,green, dest_addr, reset, delay))
+            print(
+                "{} Bytes from {}{}{} time={} ms.".format(
+                    args.bytes, green, dest_addr, reset, delay
+                )
+            )
             time.sleep(wait)
     print("")
 
@@ -339,6 +352,10 @@ def IPFILE():
 
 
 if __name__ == "__main__":
+
+    if len(sys.argv) <= 1:
+        sys.exit(parser.print_help())
+
     banner()
 
     # Bytes
@@ -372,6 +389,3 @@ if __name__ == "__main__":
                 verbose_ping(ping, args.delay, args.timeout, args.count)
         except HTTPError:
             pass
-
-        # Requset sleep
-        time.sleep(1.0)
