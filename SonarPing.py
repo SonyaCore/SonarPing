@@ -341,15 +341,29 @@ class PingQuery(concurrent.futures.ProcessPoolExecutor):
         self.close()
 
 
-def countryinfo(IP):
+class Country:
+    def __init__(self, IP):
+        countrycode = "http://ip-api.com/json/{}".format(IP)
 
-    countrycode = "http://ip-api.com/json/{}".format(IP)
+        self.httprequest = Request(countrycode, headers={"Accept": "application/json"})
 
-    httprequest = Request(countrycode, headers={"Accept": "application/json"})
+        with urlopen(self.httprequest) as response:
+            self.data = json.loads(response.read().decode())
 
-    with urlopen(httprequest) as response:
-        data = json.loads(response.read().decode())
-    return data["query"] + " " + data["regionName"] + "/" + data["city"]
+    def query(self):
+        return self.data["query"]
+
+    def regionname(self):
+        return self.data["regionName"]
+
+    def city(self):
+        return self.data["city"]
+
+    def org(self):
+        return self.data["org"]
+
+    def asdata(self):
+        return self.data["as"]
 
 
 def ipfile():
@@ -402,15 +416,23 @@ def main():
                     for ping in method:
                         country = excuter.map(
                             print(
-                                blue + str(ping) + reset + " " + countryinfo(str(ping))
+                                blue
+                                + str(ping)
+                                + reset
+                                + " "
+                                + Country(str(ping)).asdata()
+                                + " "
+                                + Country(str(ping)).city()
+                                + "/"
+                                + Country(str(ping)).regionname()
                             )
                         )
                         run = excuter.map(
                             verbose_ping(ping, args.delay, args.timeout, args.count)
                         )
 
-                        excuter.submit(run)
                         excuter.submit(country)
+                        excuter.submit(run)
             except HTTPError:
                 pass
 
@@ -440,8 +462,8 @@ if __name__ == "__main__":
     ## Ping method
     # file : read ips trough file
     # ping : read ip trough stdin
-    # cidr : scan ips with cidr
-    # cidrfile : scan ips with cidr file
+    # cidr : read ips with cidr
+    # cidrfile : read ips with cidr file
     with concurrent.futures.ProcessPoolExecutor() as exec:
         if args.file:
             method = ipfile()
