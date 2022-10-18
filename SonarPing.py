@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 
-import os , sys
+#   SonarPing
+# ------------------------------------------
+#   Author    : SonyaCore
+# 	Github    : https://github.com/SonyaCore
+#   Licence   : https://www.gnu.org/licenses/gpl-3.0.en.html
+
+import os, sys
 import time
 import socket
 import struct
@@ -11,19 +17,47 @@ from urllib.request import urlopen, Request
 from urllib.error import HTTPError
 import argparse
 
-NAME = 'SonarPING'
+NAME = "SonarPING"
 
 formatter = lambda prog: argparse.HelpFormatter(prog, max_help_position=64)
 parser = argparse.ArgumentParser(prog=f"{NAME}", formatter_class=formatter)
 
 
-parser.add_argument('--file','-f',type=argparse.FileType('r'),help='send ICMP packets to networks trough file')
-parser.add_argument('--ping','-p', nargs='+', help='send ICMP packets to network hosts')
+parser.add_argument(
+    "--file",
+    "-f",
+    type=argparse.FileType("r"),
+    help="send ICMP packets to networks trough file",
+)
+parser.add_argument(
+    "--ping", "-p", nargs="+", metavar="IP", help="send ICMP packets to network hosts"
+)
 
-option = parser.add_argument_group('ICMP Options')
-option.add_argument('--delay','-d',type=int, help='ICMP requests delay for sending each packet')
-option.add_argument('--timeout','-t',type=int, help='ICMP request timeout')
-option.add_argument('--count','-c',type=int, help='Stop current IP after sending (and receiving) count packets.')
+option = parser.add_argument_group("ICMP Options")
+option.add_argument(
+    "--delay",
+    "-d",
+    type=int,
+    metavar="",
+    help="ICMP requests delay for sending each packet",
+)
+option.add_argument(
+    "--timeout", "-t", type=int, metavar="", help="ICMP request timeout"
+)
+option.add_argument(
+    "--count",
+    "-c",
+    type=int,
+    metavar="",
+    help="Stop current IP after sending (and receiving) count packets",
+)
+option.add_argument(
+    "--bytes",
+    "-b",
+    type=int,
+    metavar="",
+    help="Total Bytes to be Send with ICMP header",
+)
 
 
 args = parser.parse_args()
@@ -34,6 +68,7 @@ yellow = "\u001b[33m"
 blue = "\u001b[34m"
 error = "\u001b[31m"
 reset = "\u001b[0m"
+
 
 def banner(t=0.0005):
     data = """{} ____                                     ____                            
@@ -48,13 +83,12 @@ def banner(t=0.0005):
 
 {}Starting Engine...{}
                                                         """.format(
-                                                        blue,
-                                                        green,
-                                                        reset)
+        blue, green, reset
+    )
     for char in data:
         sys.stdout.write(char)
         time.sleep(t)
-    sys.stdout.write('\n')
+    sys.stdout.write("\n")
 
 
 # From /usr/include/linux/icmp.h.
@@ -91,12 +125,12 @@ def checksum(source_string) -> str:
     return answer
 
 
-def create_packet(id):
+def create_packet(id, byte: int):
     """Create a new echo request packet based on the given "id"."""
     # Header is type (8), code (8), checksum (16), id (16), sequence (16)
     header = bytes(struct.pack("bbHHh", ICMP_ECHO_REQUEST, 0, 0, id, 1))
     # Total Bytes to be Send with ICMP header
-    data = bytes(192)
+    data = bytes(byte)
     # Calculate the checksum on the data and the dummy header.
     my_checksum = checksum(header + data)
     # Now that we have the right checksum, we put that in. It's just easier
@@ -129,7 +163,7 @@ def do_one(dest_addr, timeout=1):
     # Maximum for an unsigned short int c object counts to 65535 so
     # we have to sure that our packet id is not greater than that.
     packet_id = int((id(timeout) * random.random()) % 65535)
-    packet = create_packet(packet_id)
+    packet = create_packet(packet_id, args.bytes)
     while packet:
         # The icmp protocol does not use a port, but the function
         # below expects it, so we just give it a dummy port.
@@ -160,7 +194,7 @@ def receive_ping(my_socket, packet_id, time_sent, timeout):
             return
 
 
-def verbose_ping(dest_addr, wait : float , timeout , count : int):
+def verbose_ping(dest_addr, wait: float, timeout, count: int):
     """
     Sends one ping to the given "dest_addr" which can be an ip or hostname.
     "timeout" can be any integer or float except negatives and zero.
@@ -169,7 +203,7 @@ def verbose_ping(dest_addr, wait : float , timeout , count : int):
     Displays the result on the screen.
 
     """
-    if not wait :
+    if not wait:
         wait = 1.0
     for i in range(count):
         # print('ping {}...'.format(dest_addr))
@@ -178,12 +212,12 @@ def verbose_ping(dest_addr, wait : float , timeout , count : int):
             print("failed. (Timeout within {} seconds.)".format(timeout))
         else:
             delay = round(delay * 1000.0, 4)
-            print("PING {}{}{} {} ms.".format(green, dest_addr, reset, delay))
+            print("{} Bytes from {}{}{} time={} ms.".format(args.bytes,green, dest_addr, reset, delay))
             time.sleep(wait)
     print("")
 
 
-class PingQuery():
+class PingQuery:
     def __init__(self, host, p_id, timeout=0.5, ignore_errors=False):
         """
         "host" represents the address under which the server can be reached.
@@ -208,7 +242,7 @@ class PingQuery():
         # we have to sure that our packet id is not greater than that.
         self.packet_id = int((id(timeout) / p_id) % 65535)
         self.host = host
-        self.packet = create_packet(self.packet_id)
+        self.packet = create_packet(self.packet_id, args.bytes)
         if ignore_errors:
             # If it does not care whether an error occured or not.
             self.handle_error = self.do_not_handle_errors
@@ -283,6 +317,7 @@ class PingQuery():
     def handle_close(self):
         self.close()
 
+
 def COUNTRY(IP):
 
     countrycode = "http://ip-api.com/json/{}".format(IP)
@@ -291,9 +326,8 @@ def COUNTRY(IP):
 
     with urlopen(httprequest) as response:
         data = json.loads(response.read().decode())
-    return data["query"] + \
-        ' ' + data["regionName"]  +  \
-        '/' + data["city"]
+    return data["query"] + " " + data["regionName"] + "/" + data["city"]
+
 
 def IPFILE():
     ips = []
@@ -303,45 +337,41 @@ def IPFILE():
             ips.append(ip.strip())
     return ips
 
+
 if __name__ == "__main__":
     banner()
 
+    # Bytes
+    if args.bytes == None:
+        args.bytes = 64
+
     # Default timeout
-    if args.timeout == None :
+    if args.timeout == None:
         args.timeout = 2
 
     # ICMP delay
-    if args.delay == None :
+    if args.delay == None:
         args.delay = 1
 
     # ICMP Count
-    if args.count == None :
+    if args.count == None:
         args.count = 4
 
     ## Ping method
     # file : read ips trough file
     # ping : read ip trough stdin
-    if args.file :
+    if args.file:
         method = IPFILE()
-    if args.ping :
+    if args.ping:
         method = args.ping
 
     while True:
         try:
             for ping in method:
-                print(blue +
-                str(ping)
-                + reset + " " 
-                + COUNTRY(str(ping)))
-
-                verbose_ping(
-                ping,
-                args.delay,
-                args.timeout,
-                args.count)
+                print(blue + str(ping) + reset + " " + COUNTRY(str(ping)))
+                verbose_ping(ping, args.delay, args.timeout, args.count)
         except HTTPError:
             pass
-            
 
         # Requset sleep
         time.sleep(1.0)
