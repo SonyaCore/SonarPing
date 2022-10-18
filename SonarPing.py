@@ -14,6 +14,7 @@ import select
 import random
 import json
 import signal
+import concurrent.futures
 import argparse
 from urllib.request import urlopen, Request
 from urllib.error import HTTPError
@@ -115,7 +116,7 @@ ERROR_DESCR = {
 __all__ = ["create_packet", "do_one", "verbose_ping", "PingQuery"]
 
 
-def checksum(source_string) -> str:
+def checksum(source_string) -> int:
     sum = 0
     count_to = (len(source_string) / 2) * 2
     count = 0
@@ -230,17 +231,14 @@ def verbose_ping(dest_addr, wait: float, timeout, count: int):
     print("")
 
 
-class PingQuery:
-    def __init__(self, host, p_id, timeout=0.5, ignore_errors=False):
+class PingQuery(concurrent.futures.ProcessPoolExecutor):
+    def __init__(self, host, p_id, timeout=0.5, ignore_errors=True):
         """
         "host" represents the address under which the server can be reached.
         "timeout" is the interval which the host gets granted for its reply.
         "p_id" must be any unique integer or float except negatives and zeros.
-
-        If "ignore_errors" is True, the default behaviour of asyncore
-        will be     overwritten with a function which does just nothing.
         """
-        socket.__init__(self)
+        concurrent.futures.ProcessPoolExecutor.__init__(self)
         try:
             self.create_socket(socket.AF_INET, socket.SOCK_RAW, ICMP_CODE)
         except socket.error as e:
@@ -351,8 +349,30 @@ def IPFILE():
     return ips
 
 
-if __name__ == "__main__":
+def main():
+    """
+    the main file using the concurrent module for running ping in multi-thread mode
+    threads are automatically optimized with ProcessPoolExecutor so there is no need to specify threads manually
+    """
+    while True:
+        with concurrent.futures.ProcessPoolExecutor() as excuter:
+            try:
+                for args.method in method:
+                    for ping in method:
+                        country = excuter.map(
+                            print(blue + str(ping) + reset + " " + COUNTRY(str(ping)))
+                        )
+                        run = excuter.map(
+                            verbose_ping(ping, args.delay, args.timeout, args.count)
+                        )
 
+                        excuter.submit(run)
+                        excuter.submit(country)
+            except HTTPError:
+                pass
+
+
+if __name__ == "__main__":
     if len(sys.argv) <= 1:
         sys.exit(parser.print_help())
 
@@ -377,15 +397,12 @@ if __name__ == "__main__":
     ## Ping method
     # file : read ips trough file
     # ping : read ip trough stdin
-    if args.file:
-        method = IPFILE()
-    if args.ping:
-        method = args.ping
-
-    while True:
-        try:
-            for ping in method:
-                print(blue + str(ping) + reset + " " + COUNTRY(str(ping)))
-                verbose_ping(ping, args.delay, args.timeout, args.count)
-        except HTTPError:
-            pass
+    with concurrent.futures.ProcessPoolExecutor() as exec:
+        if args.file:
+            method = IPFILE()
+            exec.map(method)
+        if args.ping:
+            method = args.ping
+            exec.map(method)
+    # run main
+    exec.submit(main())
