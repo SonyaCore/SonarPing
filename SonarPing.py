@@ -26,16 +26,28 @@ VER = 0.3
 formatter = lambda prog: argparse.HelpFormatter(prog, max_help_position=64)
 parser = argparse.ArgumentParser(prog=f"{NAME}", formatter_class=formatter)
 
-
 parser.add_argument(
     "--file",
     "-f",
     type=argparse.FileType("r"),
-    help="send ICMP packets to networks trough file",
+    help="Send ICMP packets through IP file",
 )
+parser.add_argument("--ping", "-p", nargs="+", metavar="IP", help="Send ICMP packets.")
 parser.add_argument(
-    "--ping", "-p", nargs="+", metavar="IP", help="send ICMP packets to network hosts"
+    "--cidr",
+    "-r",
+    nargs="+",
+    metavar="IP",
+    help="Send ICMP packets through CIDR range",
 )
+
+parser.add_argument(
+    "--cidrfile",
+    "-cf",
+    type=argparse.FileType("r"),
+    help="Send ICMP packets with CIDR file",
+)
+
 
 option = parser.add_argument_group("ICMP Options")
 option.add_argument(
@@ -53,7 +65,7 @@ option.add_argument(
     "-c",
     type=int,
     metavar="",
-    help="Stop current IP after sending (and receiving) count packets",
+    help="Stop current IP after sending (and receiving) count response packets",
 )
 option.add_argument(
     "--bytes",
@@ -329,7 +341,7 @@ class PingQuery(concurrent.futures.ProcessPoolExecutor):
         self.close()
 
 
-def COUNTRY(IP):
+def countryinfo(IP):
 
     countrycode = "http://ip-api.com/json/{}".format(IP)
 
@@ -340,13 +352,42 @@ def COUNTRY(IP):
     return data["query"] + " " + data["regionName"] + "/" + data["city"]
 
 
-def IPFILE():
+def ipfile():
     ips = []
     with open(f"{args.file.name}", "r") as ip_file:
 
         for ip in ip_file.readlines():
             ips.append(ip.strip())
     return ips
+
+
+class Cidr(concurrent.futures.ProcessPoolExecutor):
+    "Unpack cidr ips"
+
+    def __init__(self, iprange):
+        self.ips = []
+        self.iplist = []
+
+        # read cidr trough file
+        if args.cidrfile:
+            with open(f"{args.cidrfile.name}", "r") as ip_file:
+                for ips in ip_file.readlines():
+                    self.iplist.append(ips.strip())
+            (ip, cidr) = self.iplist[0].split("/")
+        # read cidr trough stdin
+        if args.cidr:
+            (ip, cidr) = iprange[0].split("/")
+
+        cidr = int(cidr)
+        host_bits = 32 - cidr
+        self.i = struct.unpack(">I", socket.inet_aton(ip))[0]  # note the endianness
+        self.start = (self.i >> host_bits) << host_bits  # clear the host bits
+        self.end = self.start | ((1 << host_bits) - 1)
+
+    def cidrout(self):
+        for i in range(self.start, self.end):
+            self.ips.append(socket.inet_ntoa(struct.pack(">I", i)))
+        return self.ips
 
 
 def main():
@@ -360,7 +401,9 @@ def main():
                 for args.method in method:
                     for ping in method:
                         country = excuter.map(
-                            print(blue + str(ping) + reset + " " + COUNTRY(str(ping)))
+                            print(
+                                blue + str(ping) + reset + " " + countryinfo(str(ping))
+                            )
                         )
                         run = excuter.map(
                             verbose_ping(ping, args.delay, args.timeout, args.count)
@@ -397,12 +440,21 @@ if __name__ == "__main__":
     ## Ping method
     # file : read ips trough file
     # ping : read ip trough stdin
+    # cidr : scan ips with cidr
+    # cidrfile : scan ips with cidr file
     with concurrent.futures.ProcessPoolExecutor() as exec:
         if args.file:
-            method = IPFILE()
+            method = ipfile()
             exec.map(method)
         if args.ping:
             method = args.ping
+            exec.map(method)
+
+        if args.cidr:
+            method = Cidr(args.cidr).cidrout()
+            exec.map(method)
+        if args.cidrfile:
+            method = Cidr(args.cidrfile.name).cidrout()
             exec.map(method)
     # run main
     exec.submit(main())
