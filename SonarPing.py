@@ -36,14 +36,16 @@ error = "\u001b[31m"
 reset = "\u001b[0m"
 
 def banner(t=0.0005):
-    data = """{}.d88888b                                       888888ba  oo                   
-88.    "'                                      88    `8b                      
-`Y88888b. .d8888b. 88d888b. .d8888b. 88d888b. a88aaaa8P' dP 88d888b. .d8888b. 
-      `8b 88'  `88 88'  `88 88'  `88 88'  `88  88        88 88'  `88 88'  `88 
-d8'   .8P 88.  .88 88    88 88.  .88 88        88        88 88    88 88.  .88 
- Y88888P  `88888P' dP    dP `88888P8 dP        dP        dP dP    dP `8888P88 
-                                                                          .88 
-                                                                      d8888P  
+    data = """{} ____                                     ____                            
+/\  _`\                                  /\  _`\   __                     
+\ \,\L\_\    ___     ___      __     _ __\ \ \L\ \/\_\    ___      __     
+ \/_\__ \   / __`\ /' _ `\  /'__`\  /\`'__\ \ ,__/\/\ \ /' _ `\  /'_ `\   
+   /\ \L\ \/\ \L\ \/\ \/\ \/\ \L\.\_\ \ \/ \ \ \/  \ \ \/\ \/\ \/\ \L\ \  
+   \ `\____\ \____/\ \_\ \_\ \__/.\_\\  \_\  \ \_\   \ \_\ \_\ \_\ \____ \ 
+    \/_____/\/___/  \/_/\/_/\/__/\/_/ \/_/   \/_/    \/_/\/_/\/_/\/___L\ \\
+                                                                   /\____/
+                                                                   \_/__/ 
+
 {}Starting Engine...{}
                                                         """.format(
                                                         blue,
@@ -184,23 +186,12 @@ def verbose_ping(dest_addr, wait : float , timeout , count : int):
 class PingQuery():
     def __init__(self, host, p_id, timeout=0.5, ignore_errors=False):
         """
-        Derived class from "asyncore.dispatcher" for sending and
-        receiving an icmp echo request/reply.
-
-        Usually this class is used in conjunction with the "loop"
-        function of asyncore.
-
-        Once the loop is over, you can retrieve the results with
-        the "get_result" method. Assignment is possible through
-        the "get_host" method.
-
         "host" represents the address under which the server can be reached.
         "timeout" is the interval which the host gets granted for its reply.
         "p_id" must be any unique integer or float except negatives and zeros.
 
         If "ignore_errors" is True, the default behaviour of asyncore
         will be     overwritten with a function which does just nothing.
-
         """
         socket.__init__(self)
         try:
@@ -303,12 +294,6 @@ def COUNTRY(IP):
     return data["query"] + \
         ' ' + data["regionName"]  +  \
         '/' + data["city"]
-
-# class IPS:
-#         #CloudFlare = 'https://www.cloudflare.com/ips-v4'
-#         Fastly = 'https://api.fastly.com/public-ip-list'
-#         MaxCDN = 'https://support.maxcdn.com/hc/en-us/article_attachments/360051920551/maxcdn_ips.txt'
-#         CacheFly = 'https://cachefly.cachefly.net/ips/rproxy.txt'
 
 def IPFILE():
     ips = []
