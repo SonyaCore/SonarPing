@@ -1,4 +1,5 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
+
 import os , sys
 import time
 import socket
@@ -15,7 +16,15 @@ NAME = 'SonarPING'
 formatter = lambda prog: argparse.HelpFormatter(prog, max_help_position=64)
 parser = argparse.ArgumentParser(prog=f"{NAME}", formatter_class=formatter)
 
-parser.add_argument('--file','-f',type=argparse.FileType('r'))
+
+parser.add_argument('--file','-f',type=argparse.FileType('r'),help='send ICMP packets to networks trough file')
+parser.add_argument('--ping','-p', nargs='+', help='send ICMP packets to network hosts')
+
+option = parser.add_argument_group('ICMP Options')
+option.add_argument('--delay','-d',type=int, help='ICMP requests delay for sending each packet')
+option.add_argument('--timeout','-t',type=int, help='ICMP request timeout')
+option.add_argument('--count','-c',type=int, help='Stop current IP after sending (and receiving) count packets.')
+
 
 args = parser.parse_args()
 
@@ -43,6 +52,7 @@ d8'   .8P 88.  .88 88    88 88.  .88 88        88        88 88    88 88.  .88
     for char in data:
         sys.stdout.write(char)
         time.sleep(t)
+    sys.stdout.write('\n')
 
 
 # From /usr/include/linux/icmp.h.
@@ -148,7 +158,7 @@ def receive_ping(my_socket, packet_id, time_sent, timeout):
             return
 
 
-def verbose_ping(dest_addr, wait : float , timeout=2, count=8):
+def verbose_ping(dest_addr, wait : float , timeout , count : int):
     """
     Sends one ping to the given "dest_addr" which can be an ip or hostname.
     "timeout" can be any integer or float except negatives and zero.
@@ -294,14 +304,11 @@ def COUNTRY(IP):
         ' ' + data["regionName"]  +  \
         '/' + data["city"]
 
-class IPS:
-        #CloudFlare = 'https://www.cloudflare.com/ips-v4'
-        Fastly = 'https://api.fastly.com/public-ip-list'
-        MaxCDN = 'https://support.maxcdn.com/hc/en-us/article_attachments/360051920551/maxcdn_ips.txt'
-        CacheFly = 'https://cachefly.cachefly.net/ips/rproxy.txt'
-
-def IPROUTE():
-    print('')
+# class IPS:
+#         #CloudFlare = 'https://www.cloudflare.com/ips-v4'
+#         Fastly = 'https://api.fastly.com/public-ip-list'
+#         MaxCDN = 'https://support.maxcdn.com/hc/en-us/article_attachments/360051920551/maxcdn_ips.txt'
+#         CacheFly = 'https://cachefly.cachefly.net/ips/rproxy.txt'
 
 def IPFILE():
     ips = []
@@ -313,12 +320,40 @@ def IPFILE():
 
 if __name__ == "__main__":
     banner()
+
+    # Default timeout
+    if args.timeout == None :
+        args.timeout = 2
+
+    # ICMP delay
+    if args.delay == None :
+        args.delay = 1
+
+    # ICMP Count
+    if args.count == None :
+        args.count = 4
+
+    ## Ping method
+    # file : read ips trough file
+    # ping : read ip trough stdin
+    if args.file :
+        method = IPFILE()
+    if args.ping :
+        method = args.ping
+
     while True:
         try:
-            for ping in IPFILE():
-                print(ping)
-                print(blue + str(ping) + reset + " " + COUNTRY(str(ping)))
-                verbose_ping(ping,0.2)
+            for ping in method:
+                print(blue +
+                str(ping)
+                + reset + " " 
+                + COUNTRY(str(ping)))
+
+                verbose_ping(
+                ping,
+                args.delay,
+                args.timeout,
+                args.count)
         except HTTPError:
             pass
             
