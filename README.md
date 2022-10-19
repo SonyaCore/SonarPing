@@ -32,7 +32,7 @@ Also, it uses multi-threading for sending requests
 sudo python3 SonarPing.py --ping google.com 8.8.8.8 1.1.1.1
 ```
 ```bash
-sudo python3 SonarPing.py --file google.com 8.8.8.8 1.1.1.1
+sudo python3 SonarPing.py --file ips.txt
 ```
 ### Ping CIDR or CIDR File :
 ```bash
