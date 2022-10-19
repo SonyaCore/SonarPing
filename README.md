@@ -66,12 +66,12 @@ https://raw.githubusercontent.com/SonyaCore/SonarPing/main/SonarPing.py | sudo p
 ## License
 Licensed under the [GPL-3](LICENSE) license.
 
-[contributors-shield]: https://img.shields.io/github/contributors/SonyaCore/SonarPing?style=flat&logo=appveyorg
+[contributors-shield]: https://img.shields.io/github/contributors/SonyaCore/SonarPing?style=flat
 [contributors-url]: https://github.com/SonyaCore/SonarPing/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/SonyaCore/SonarPing?style=flat&logo=appveyorg
+[forks-shield]: https://img.shields.io/github/forks/SonyaCore/SonarPing?style=flat
 [forks-url]: https://github.com/SonyaCore/SonarPing/network/members
-[stars-shield]: https://img.shields.io/github/stars/SonyaCore/SonarPing?style=flat&logo=appveyorg
+[stars-shield]: https://img.shields.io/github/stars/SonyaCore/SonarPing?style=flat
 [stars-url]: https://github.com/SonyaCore/SonarPing/stargazers
-[issues-shield]: https://img.shields.io/github/issues/SonyaCore/SonarPing?style=flat&logo=appveyorg
+[issues-shield]: https://img.shields.io/github/issues/SonyaCore/SonarPing?style=flat
 [issues-url]: https://github.com/SonyaCore/SonarPing/issues
 [LICENSE]: https://www.gnu.org/licenses/gpl-3.0.en.html
