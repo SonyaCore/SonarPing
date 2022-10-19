@@ -24,7 +24,7 @@ It can use a CIDR file or a list of IPs in a file for sending ICMP_ECHO_REQUEST
 
 Also, it uses multi-threading for sending requests
 
-## How To Use
+## Usage
 > SonarPing are rewritten ping protocol in python and becuase of that root privileges is required
 
 ### Ping Specific IP or Multiplie IPS :
@@ -47,7 +47,7 @@ sudo python3 SonarPing.py --cidrfile ips.txt
 https://raw.githubusercontent.com/SonyaCore/SonarPing/main/SonarPing.py | sudo python3 - --cidrfile ips.txt --delay 0.5
 ```
 
-## Usage
+## Options
 |                |                               |
 |----------------|-------------------------------|
 |--file , -f     | `Send ICMP packets through IP file`   |
