@@ -12,7 +12,7 @@
 ![Sample](contents/Screenshot1.png)
 
 - [**Overview**](#overview)
-- [**How To Use**](#howtouse)
+- [**Usage**](#usage)
 - [**Options**](#options)
 - [**License**](#license)
 
@@ -23,7 +23,6 @@ This tool allows sending ICMP requests for specific CIDR or multiple IPs with cu
 It can use a CIDR file or a list of IPs in a file for sending ICMP_ECHO_REQUEST
 
 Also, it uses multi-threading for sending requests
-
 
 ## How To Use
 > SonarPing are rewritten ping protocol in python and becuase of that root privileges is required
@@ -48,7 +47,7 @@ sudo python3 SonarPing.py --cidrfile ips.txt
 https://raw.githubusercontent.com/SonyaCore/SonarPing/main/SonarPing.py | sudo python3 - --cidrfile ips.txt --delay 0.5
 ```
 
-## Options
+## Usage
 |                |                               |
 |----------------|-------------------------------|
 |--file , -f     | `Send ICMP packets through IP file`   |
@@ -64,7 +63,7 @@ https://raw.githubusercontent.com/SonyaCore/SonarPing/main/SonarPing.py | sudo p
 |--timeout , -t  |`ICMP request timeout`            |
 |--bytes , -b    | `Total Bytes to be Send with ICMP header` |
 
-## Licence
+## License
 Licensed under the [GPL-3](LICENSE) license.
 
 [contributors-shield]: https://img.shields.io/github/contributors/SonyaCore/SonarPing?style=flat&logo=appveyorg
