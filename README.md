@@ -14,16 +14,15 @@
 - [**Overview**](#overview)
 - [**How To Use**](#howtouse)
 - [**Options**](#options)
-
-
+- [**License**](#license)
 
 ## Overview
 
-this tool that allows sending ICMP requests for specific CIDR or multiple ips with custom options.
+This tool allows sending ICMP requests for specific CIDR or multiple IPs with custom options.
 
-it can use cidr file or a list of ips in a file for sending ICMP_ECHO_REQUEST
+It can use a CIDR file or a list of IPs in a file for sending ICMP_ECHO_REQUEST
 
-also it uses mutli-threading for sending requests
+Also, it uses multi-threading for sending requests
 
 
 ## How To Use
@@ -45,11 +44,17 @@ sudo python3 SonarPing.py --cidrfile ips.txt
 ```
 ### Note :
 > Because there is no dependency for this script you can use curl directly to execute this script
-```ash
+```bash
 https://raw.githubusercontent.com/SonyaCore/SonarPing/main/SonarPing.py | sudo python3 - --cidrfile ips.txt --delay 0.5
 ```
 
-## Options :
+## Options
+|                |                               |
+|----------------|-------------------------------|
+|--file , -f     | `Send ICMP packets through IP file`   |
+|--ping , -p     | `Send ICMP packets`                   |
+|--cidr , -r     | `Send ICMP packets through CIDR range`|
+|--cidrfile , -cf| `Send ICMP packets with CIDR file`    |
 
 |                |                               |
 |----------------|-------------------------------|
@@ -59,6 +64,8 @@ https://raw.githubusercontent.com/SonyaCore/SonarPing/main/SonarPing.py | sudo p
 |--timeout , -t  |`ICMP request timeout`            |
 |--bytes , -b    | `Total Bytes to be Send with ICMP header` |
 
+## Licence
+Licensed under the [GPL-3](LICENSE) license.
 
 [contributors-shield]: https://img.shields.io/github/contributors/SonyaCore/SonarPing?style=flat&logo=appveyorg
 [contributors-url]: https://github.com/SonyaCore/SonarPing/graphs/contributors
@@ -68,3 +75,4 @@ https://raw.githubusercontent.com/SonyaCore/SonarPing/main/SonarPing.py | sudo p
 [stars-url]: https://github.com/SonyaCore/SonarPing/stargazers
 [issues-shield]: https://img.shields.io/github/issues/SonyaCore/SonarPing?style=flat&logo=appveyorg
 [issues-url]: https://github.com/SonyaCore/SonarPing/issues
+[LICENSE]: https://www.gnu.org/licenses/gpl-3.0.en.html
