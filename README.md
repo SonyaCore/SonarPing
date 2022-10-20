@@ -24,7 +24,7 @@ It can use a CIDR file or a list of IPs in a file for sending ICMP_ECHO_REQUEST
 
 Also, it uses multi-threading for sending requests
 
-## How To Use
+## Usage
 > SonarPing are rewritten ping protocol in python and becuase of that root privileges is required
 
 ### Ping Specific IP or Multiplie IPS :
@@ -32,7 +32,7 @@ Also, it uses multi-threading for sending requests
 sudo python3 SonarPing.py --ping google.com 8.8.8.8 1.1.1.1
 ```
 ```bash
-sudo python3 SonarPing.py --file google.com 8.8.8.8 1.1.1.1
+sudo python3 SonarPing.py --file ips.txt
 ```
 ### Ping CIDR or CIDR File :
 ```bash
@@ -47,7 +47,7 @@ sudo python3 SonarPing.py --cidrfile ips.txt
 https://raw.githubusercontent.com/SonyaCore/SonarPing/main/SonarPing.py | sudo python3 - --cidrfile ips.txt --delay 0.5
 ```
 
-## Usage
+## Options
 |                |                               |
 |----------------|-------------------------------|
 |--file , -f     | `Send ICMP packets through IP file`   |
@@ -66,12 +66,12 @@ https://raw.githubusercontent.com/SonyaCore/SonarPing/main/SonarPing.py | sudo p
 ## License
 Licensed under the [GPL-3](LICENSE) license.
 
-[contributors-shield]: https://img.shields.io/github/contributors/SonyaCore/SonarPing?style=flat&logo=appveyorg
+[contributors-shield]: https://img.shields.io/github/contributors/SonyaCore/SonarPing?style=flat
 [contributors-url]: https://github.com/SonyaCore/SonarPing/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/SonyaCore/SonarPing?style=flat&logo=appveyorg
+[forks-shield]: https://img.shields.io/github/forks/SonyaCore/SonarPing?style=flat
 [forks-url]: https://github.com/SonyaCore/SonarPing/network/members
-[stars-shield]: https://img.shields.io/github/stars/SonyaCore/SonarPing?style=flat&logo=appveyorg
+[stars-shield]: https://img.shields.io/github/stars/SonyaCore/SonarPing?style=flat
 [stars-url]: https://github.com/SonyaCore/SonarPing/stargazers
-[issues-shield]: https://img.shields.io/github/issues/SonyaCore/SonarPing?style=flat&logo=appveyorg
+[issues-shield]: https://img.shields.io/github/issues/SonyaCore/SonarPing?style=flat
 [issues-url]: https://github.com/SonyaCore/SonarPing/issues
 [LICENSE]: https://www.gnu.org/licenses/gpl-3.0.en.html
