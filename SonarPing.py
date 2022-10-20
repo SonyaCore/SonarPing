@@ -6,6 +6,7 @@
 # 	Github    : https://github.com/SonyaCore
 #   Licence   : https://www.gnu.org/licenses/gpl-3.0.en.html
 
+from re import S
 import sys
 import time
 import socket
@@ -70,9 +71,16 @@ option.add_argument(
 option.add_argument(
     "--bytes",
     "-b",
-    type=float,
+    type=int,
     metavar="",
     help="Total Bytes to be Send with ICMP header",
+)
+option = parser.add_argument_group("CDN Scan")
+option.add_argument(
+    "--fastly",
+    "--fastly-cdn",
+    action="store_true",
+    help="scan fastly cdn ip ranges",
 )
 
 
@@ -391,7 +399,7 @@ class Cidr(concurrent.futures.ProcessPoolExecutor):
         # read cidr trough stdin
         if args.cidr:
             (ip, cidr) = iprange[0].split("/")
-
+            
         cidr = int(cidr)
         host_bits = 32 - cidr
         self.i = struct.unpack(">I", socket.inet_aton(ip))[0]  # note the endianness
@@ -402,6 +410,21 @@ class Cidr(concurrent.futures.ProcessPoolExecutor):
         for i in range(self.start, self.end):
             self.ips.append(socket.inet_ntoa(struct.pack(">I", i)))
         return self.ips
+
+
+class CDNList:
+        #CloudFlare = 'https://www.cloudflare.com/ips-v4'
+        Fastly = 'https://api.fastly.com/public-ip-list'
+        MaxCDN = 'https://support.maxcdn.com/hc/en-us/article_attachments/360051920551/maxcdn_ips.txt'
+        CacheFly = 'https://cachefly.cachefly.net/ips/rproxy.txt'
+
+def cdnranges(url):
+        data = f"{url}"
+
+        httprequest = Request(data, headers={"Accept": "text/plain"})
+
+        with urlopen(httprequest) as response:
+            return response.read().decode()
 
 
 def main():
@@ -478,5 +501,9 @@ if __name__ == "__main__":
         if args.cidrfile:
             method = Cidr(args.cidrfile.name).cidrout()
             exec.map(method)
+        if args.fastly :
+            method = Cidr(cdnranges(CDNList.MaxCDN)).cidrout()
+            exec.map(method)
+
     # run main
     exec.submit(main())
